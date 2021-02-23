@@ -1,4 +1,20 @@
 import numpy as np
+from copy import deepcopy
+ 
+def swapIndexValues(state):
+    """
+    Swaps an array so each index is placed at its current value.
+
+        Parameters:
+            state: An integer array
+        
+        Returns:
+            swapped: An integer array with the swapped index, values.
+    """
+    swapped = np.array(range(9))
+    for index, value in enumerate(state):
+        swapped[value] = index
+    return swapped
 
 def misplacedCost(currentState, goalState):
     cost = 0
@@ -7,23 +23,91 @@ def misplacedCost(currentState, goalState):
             cost += 1
     return cost
 
-def coordinates(state):
-    coordinates = np.array(range(9))
-    for x, y in enumerate(state):
-        coordinates[y] = x
-    return coordinates
-
 def manhattanCost(currentState, goalState):
-    coordinates = np.array(range(9))
-    for x, y in enumerate(currentState):
-        coordinates[y] = x
-    cost = abs(currentState // 3 - goalState // 3) + abs(currentState % 3 - goalState % 3)
-    return sum(cost[1:])
+    modulusTotal = abs(currentState // 3 - goalState // 3)
+    remainderTotal = abs(currentState % 3 - goalState % 3)
+    costTotal = modulusTotal + remainderTotal
+    return sum(costTotal[1:9])
 
 
-initialState = [7, 2, 4, 5, 0, 6, 8, 3, 1]
-goalState = [0, 1, 2, 3, 4, 5, 6, 7, 8]
+def solvePuzzle(initialState, goalState):
+    steps = np.array([('up', [0, 1, 2], -3),('down', [6, 7, 8],  3),('left', [0, 3, 6], -1),('right', [2, 5, 8], 1)],
+                dtype =  [('move', str, 1),('position', list),('head', int)])
 
-function_type = input('Pick a heuristic function:\na. Misplaced Tiles \nb. Manhattan Distance\n')
+    dtstate = [('puzzle', list),('parent', int),('gScore',  int),('hScore',  int)]
+    dtstateTest = {
+        "puzzle": initialState,
+        "parent": -1,
+        "gScore": 0,
+        "hScore": manhattanCost(swapIndexValues(initialState), swapIndexValues(goalState))
+    }
 
-print(manhattanCost(coordinates(initialState), coordinates(goalState)))
+    parent = -1
+    gScore = 0
+    hScore = manhattanCost(swapIndexValues(initialState), swapIndexValues(goalState))
+    state = np.array([(initialState, parent, gScore, hScore)], dtstate)
+    stateTest = np.array([dtstateTest])
+    
+    
+    solved = False
+
+    dtpriority = [('position', int),('fScore', int)]
+    priority = np.array( [(0, hScore)], dtpriority)
+
+    print("Solving Puzzle...\n")
+    while not solved:
+        priority = np.sort(priority, kind='mergesort', order=['fScore', 'position'])
+        position, fScore = priority[0]
+        priority = np.delete(priority, 0, 0)
+        puzzle, parent, gScore, hScore = state[position]
+        """
+        puzzle = np.array(stateTest[position]["puzzle"])
+        parent = stateTest[position]["parent"]
+        gScore = stateTest[position]["gScore"]
+        hScore = stateTest[position]["hScore"]
+        """
+
+        nullSquare = int(np.where(puzzle == 0)[0])
+        gScore += 1
+
+        for step in steps:
+            if nullSquare not in step['position']:
+                openStates = deepcopy(puzzle)
+                print(openStates[nullSquare + step['head']])
+                temp = openStates[nullSquare + step['head']]
+                openStates[nullSquare + step['head']] = openStates[nullSquare]
+                openStates[nullSquare] = temp
+                if not (np.all(list(state['puzzle']) == openStates, 1)).any():
+
+                    hScore = manhattanCost(swapIndexValues(openStates), swapIndexValues(goalState))
+                    q = np.array([(openStates, position, gScore, hScore)], dtstate)
+                    state = np.append(state, q, 0)
+                    fScore = gScore + hScore
+
+                    q = np.array([(len(state) - 1, fScore)], dtpriority)
+                    priority = np.append(priority, q, 0)
+                    if np.array_equal(openStates, goalState):
+                        solved = True
+
+    print("Puzzle has been solved!\n")
+    return state, priority
+
+def displayPuzzle(puzzle):
+    print(str(puzzle.reshape(-1, 3, 3)).replace("  [", "").replace("[", "").replace("]", "") + "\n")
+
+
+def main():
+    initialState = np.array([7, 2, 4, 5, 0, 6, 8, 3, 1])
+    goalState = np.array([0, 1, 2, 3, 4, 5, 6, 7, 8])
+    print("Initial State: \n")
+    displayPuzzle(initialState)
+    print("Goal State: \n")
+    displayPuzzle(goalState)
+
+    #heuristicType = input('Pick a heuristic function:\na. Misplaced Tiles \nb. Manhattan Distance\n')
+    print("Pick a heuristic function:\na. Misplaced Tiles \nb. Manhattan Distance\n")
+
+    state, visited = solvePuzzle(initialState, goalState)
+
+if __name__ == "__main__":
+    main()
