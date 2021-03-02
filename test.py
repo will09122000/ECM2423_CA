@@ -39,7 +39,7 @@ def solvePuzzle(heuristicType, initialState, goalState):
     parent = -1
     gScore = 0
     if heuristicType == "a":
-        hScore = misplacedCost(initialState, goalState)
+        hScore = misplacedCost(swapIndexValues(initialState), swapIndexValues(goalState))
     else:
         hScore = manhattanCost(swapIndexValues(initialState), swapIndexValues(goalState))
     state = np.array([(initialState, parent, gScore, hScore)], dtstate)
@@ -65,7 +65,6 @@ def solvePuzzle(heuristicType, initialState, goalState):
 
         nullSquare = int(np.where(puzzle == 0)[0])
         gScore += 1
-        print(hScore)
 
         for step in steps:
             if nullSquare not in step['position']:
@@ -75,9 +74,9 @@ def solvePuzzle(heuristicType, initialState, goalState):
                 openStates[nullSquare] = temp
                 if not (np.all(list(state['puzzle']) == openStates, 1)).any():
                     if heuristicType == "a":
-                        hScore = misplacedCost(openStates, goalState)
+                        hScore = misplacedCost(swapIndexValues(initialState), swapIndexValues(goalState))
                     else:
-                        hScore = manhattanCost(swapIndexValues(openStates), swapIndexValues(goalState))
+                        hScore = manhattanCost(swapIndexValues(initialState), swapIndexValues(goalState))
                     q = np.array([(openStates, position, gScore, hScore)], dtstate)
                     state = np.append(state, q, 0)
                     fScore = gScore + hScore
