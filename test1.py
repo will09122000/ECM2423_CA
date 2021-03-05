@@ -146,7 +146,6 @@ def evaluvate_misplaced(puzzle, goal):
         gn = gn + 1                             
         c = 1
         start_time = time.time()
-        print(hn)
         for s in steps:
             c = c + 1
             if blank not in s['position']:
