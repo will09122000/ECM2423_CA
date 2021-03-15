@@ -2,7 +2,6 @@ from sklearn import datasets, svm, metrics
 from sklearn.model_selection import train_test_split
 import matplotlib.pyplot as plt 
 
-
 def main():
     digits = datasets.load_digits()
 
@@ -47,3 +46,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+    
