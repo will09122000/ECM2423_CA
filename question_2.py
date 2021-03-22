@@ -1,12 +1,10 @@
 from sklearn import datasets, svm, metrics
 from sklearn.model_selection import train_test_split
-import matplotlib.pyplot as plt 
+import matplotlib.pyplot as plt
 
 def main():
-    # Load the digits
+    # Load the images and flatten them
     digits = datasets.load_digits()
-
-    # flatten the images
     data = digits.images.reshape((len(digits.images), -1))
 
     # Create a classifier: a support vector classifier

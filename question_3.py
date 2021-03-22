@@ -1,13 +1,13 @@
 import pydotplus
 import pandas as pd
 import seaborn as sns
-from sklearn import metrics
 import matplotlib.pyplot as plt
+from sklearn import metrics
 from sklearn.model_selection import train_test_split
 from sklearn.tree import DecisionTreeClassifier
+from sklearn.tree import export_graphviz
 from six import StringIO
 from IPython.display import Image
-from sklearn.tree import export_graphviz
 
 def main():
     featureColumns = ["Roads:number_intersections",
@@ -44,12 +44,13 @@ def main():
     X_train, X_test, Y_train, Y_test = train_test_split(x, y, test_size = 0.3,
                                                         random_state = 0)
 
-    # Decision tree using entropy
+    # Create the decision tree using entropy
     dtc = DecisionTreeClassifier(criterion = "entropy")
     clf = dtc.fit(X_train,Y_train)
     clf.score(X_test, Y_test)
 
-    # Calculate the accuracy for varying depth of the tree and see how it changes
+    # Calculate the accuracy for varying depth of the tree and see how it
+    # changes
     accuracyArray = []
     for depth in range(1, 100):
         dtc = DecisionTreeClassifier(max_depth = depth)
@@ -67,7 +68,8 @@ def main():
     # Display the most important features for a fitted tree ranked
     importances = []
     names = []
-    for importance, name in sorted(zip(clf.feature_importances_, X_train.columns), reverse=True):
+    for importance, name in sorted(zip(clf.feature_importances_, X_train.columns),
+                                   reverse=True):
         if (importance > 0):
             importances.append(importance)
             names.append(name)
@@ -86,8 +88,8 @@ def main():
                     special_characters=True, feature_names = featureColumns,
                     class_names = classNames)
     graph = pydotplus.graph_from_dot_data(data.getvalue())
-    #graph.write_png("Decision Tree.png")
-    #Image(graph.create_png())
+    graph.write_png("Decision Tree.png")
+    Image(graph.create_png())
 
     plt.show()
 
